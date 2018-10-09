@@ -19,7 +19,7 @@ def get_local():
 
 newest = {}
 current = {}
-to_remove = {}
+dups = {}
 
 if __name__ == "__main__":
     available = get_available()
@@ -29,24 +29,17 @@ if __name__ == "__main__":
         os_title = line.split('-')[0]
         if os_title not in current:
             current[os_title] = line
+        elif os_title in current:
+            print("Removing older template " + line)
+            cmd = "pveam remove local:vztmpl/" + line
+            ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+            output = ps.communicate()[0]
+            output = output.decode("ascii")
 
     for line in sorted(available, reverse=True):
         os_title = line.split('-')[0]
         if os_title not in newest:
             newest[os_title] = line
-
-    for (k,v), (k2,v2) in zip(newest.items(), current.items()):
-        if v > v2:
-            print v2 + " is newer than than " + v
-            to_remove[os_title] = v2
-
-    if to_remove:
-        for item in to_remove.values():
-            print("Removing older template " + item)
-            cmd = "pveam remove " + item
-            ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
-            output = ps.communicate()[0]
-            output = output.decode("ascii")
 
     if len(current) < 1:
         for item in newest.values():
@@ -56,12 +49,24 @@ if __name__ == "__main__":
             output = ps.communicate()[0]
             output = output.decode("ascii")
 
-    for (k,v), (k2,v2) in zip(newest.items(), current.items()):
-        if v > v2 or k not in current:
-            print("Downloading " + item).strip()
-            cmd = "pveam download local " + item
-            ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
-            output = ps.communicate()[0]
-            output = output.decode("ascii")
-        elif v == v2:
-            print ("Skipping " + v + " as it's the latest version")
+    if len(current) > 0:
+        for (k,v), (k2,v2) in zip(newest.items(), current.items()):
+            if v > v2:
+                print("Downloading " + v).strip()
+                cmd = "pveam download local " + v
+                ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+                output = ps.communicate()[0]
+                output = output.decode("ascii")
+            elif v == v2:
+                print ("Skipping " + v + " as it's the latest version")
+        getlocal = get_local()
+        for line in sorted(getlocal, reverse=True):
+            os_title = line.split('-')[0]
+            if os_title not in dups:
+                dups[os_title] = line
+            elif os_title in dups:
+                print("Removing older template " + line)
+                cmd = "pveam remove local:vztmpl/" + line
+                ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+                output = ps.communicate()[0]
+                output = output.decode("ascii")
