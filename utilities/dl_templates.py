@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+# The purpose of this code is to automate downloading the latest containers for proxmox
 import sys
 import subprocess
 
