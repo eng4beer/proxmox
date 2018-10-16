@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+__author__ = "Scott Hamilton"
+__license__ = "MIT"
+__version__ = "1.0"
+__maintainer__ = "Scott Hamilton"
+__email__ = "funtimes@runcode.ninja"
+__status__ = "It works....."
+
 import sys
 import subprocess
 
